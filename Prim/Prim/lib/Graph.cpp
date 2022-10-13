@@ -193,7 +193,7 @@ void Graph::makeMiniTree(){
             int currentIndex = getMiniWeightNode();
             nodes[currentIndex].isSelected = true;
             vector<Edge> childrenEdges =  getAdjacentEdgeList(nodes[currentIndex]);
-            calculMiniWeight(currentIndex, childrenEdges);
+            calculMiniWeight(currentIndex, childrenEdges);   // O(m*n)
             printTablePrim();
 
 
@@ -268,11 +268,11 @@ bool Graph::sous_allTtoS(Node node, vector<Edge> edges){
             }
             
             int index_s ;
-            for(int i =0 ;i<edges.size();i++){
-                if(edges[i].getFrom() == node.name && edges[i].getTo() == nextNode.name  )
-                    index_s = i;
-                if (edges[i].getTo() == node.name && edges[i].getFrom() == nextNode.name )
-                    index_s = i;
+            for(int j =0 ;j<edges.size();j++){
+                if(edges[j].getFrom() == node.name && edges[j].getTo() == nextNode.name  )
+                    index_s = j;
+                if (edges[j].getTo() == node.name && edges[j].getFrom() == nextNode.name )
+                    index_s = j;
             }
             vector<Edge> nextEdges  = edges;
             nextEdges.erase(nextEdges.begin()+index_s);
