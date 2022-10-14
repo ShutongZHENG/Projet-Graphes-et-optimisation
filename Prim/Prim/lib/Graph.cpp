@@ -179,7 +179,7 @@ void Graph::calculMiniWeight(int index, vector<Edge> childrenEdges){
 void Graph::makeMiniTree(){
     
     if(!nodes.empty()){
-         //initialisation
+        //initialisation
         nodes[0].isSelected = true;
         vector<Edge> childrenEdges = getAdjacentEdgeList(nodes[0]);
         calculMiniWeight(0, childrenEdges);
@@ -391,8 +391,221 @@ void Graph::makeMiniTree_Economic(){
         }
         cout << endl;
     }
+
+
+
+    
+}
+
+
+
+/// Description
+/// Déterminer si l'ensemble de nœuds contient le nœud requis
+/// - Parameters:
+///   - nodes: Ensemble de noeuds
+///   - node: Le nœud qui doit être jugé
+/// - Returns : Renvoie vrai si le nœud est inclus sinon renvoie faux
+bool existNode(vector<Node> nodes, string node){
+    for (int i = 0; i < nodes.size(); ++i) {
+        if (nodes[i].name == node )
+            return true;
+    }
+    return false;
+
+}
+
+
+/// Description
+/// Obtenir le degré du nœud
+/// - Parameters:
+///   - node: node description : Le nœud qui doit renvoyer le degré
+///   - edges: edges description : ensemble d'arètes
+/// - Returns: renvoie le degré du nœud
+int getDegreeNode(Node node, vector<Edge> edges){
+    int res = 0;
+    for (int i = 0; i < edges.size(); ++i) {
+        if (edges[i].getFrom() == node.name)
+            res++;
+        if (edges[i].getTo() == node.name)
+            res++;
+    }
+    return res;
+
+
+}
+
+/// Description
+/// Déterminer s'il existe un nœud de degré inférieur ou égal à 1
+/// - Parameter nodes: nodes description: Ensemble de noeuds
+/// - Returns: Renvoie true s'il existe un nœud de degré inférieur ou égal à 1, sinon renvoie false
+bool hasDegreeInf1(vector<Node> nodes){
+    for (int i = 0; i < nodes.size(); ++i) {
+             if(nodes[i].degree <= 1)
+                 return true;
+    }
+    return false;
+
+}
+
+/// Description
+/// supprimer une arête contenant un nœud
+/// - Parameters:
+///   - node: node description : Nœud inclus
+///   - edges: edges description : ensemble d'arètes
+/// - Returns: Renvoie l'ensemble des arêtes après avoir supprimé le nœud
+vector<Edge> deleteEdge(Node node, vector<Edge> edges){
+
+    vector<Edge> edges_new;
+    for(int i = 0 ; i<edges.size(); ++i){
+        if(edges[i].getTo() != node.name && edges[i].getFrom() != node.name)
+            edges_new.push_back(edges[i]);
+    }
+
+
+    return edges_new;
+
+}
+
+/// Description
+/// Supprimer un nœud dans l'ensemble de nœuds et réduire de 1 le degré d'un autre nœud connecté à ce nœud
+/// - Parameters:
+///   - node: node description : nœud à supprimer
+///   - edges: edges description : ensemble d'arètes
+///   - nodes: nodes description : ensemble de nœuds
+/// - Returns: Renvoie le nouvel ensemble de noeuds après suppression
+vector<Node> deleteNode(Node node,vector<Edge> edges, vector<Node> nodes){
+    vector<Node> nodes_new;
+    string node2_name = "";
+    int index_node;
+    for(int i =0 ; i < edges.size(); ++i){
+        if(edges[i].getTo() == node.name){
+            node2_name = edges[i].getFrom();
+            break;
+            
+        }
+        if(edges[i].getFrom() == node.name){
+            node2_name = edges[i].getTo();
+            break;
+        }
         
+    }
+    
+    for(int i = 0; i<nodes.size() ; i++){
+        if(nodes[i].name == node.name){
+            index_node = i;
+        }
+    }
+    
+    for(int i = 0 ; i<nodes.size(); i++){
+        if(i != index_node ){
+            if(nodes[i].name == node2_name)
+                nodes[i].degree = nodes[i].degree -1;
+            nodes_new.push_back(nodes[i]);
+        }
+        
+    }
     
     
+    return nodes_new;
     
+}
+
+/// Description
+/// Déterminer si un graphe non orienté a des cycles
+/// - Parameter edges: edges description : ensemble d'arètes
+/// - Returns: Renvoie vrai s'il y a une cycle, sinon renvoie faux
+bool Graph::isCycle(vector<Edge> edges){
+
+    vector<Node> nodes_tmp;
+
+    //search nodes of edges
+
+    for (int i = 0; i < edges.size(); ++i) {
+        if (!existNode( nodes_tmp,edges[i].getFrom()))
+            nodes_tmp.push_back({edges[i].getFrom(), false,-1,""});
+        if (!existNode( nodes_tmp,edges[i].getTo()))
+            nodes_tmp.push_back({edges[i].getTo(), false,-1,""});
+    }
+
+    //search degree of node
+    for (int i = 0; i < nodes_tmp.size(); ++i) {
+        nodes_tmp[i].degree = getDegreeNode(nodes_tmp[i], edges);
+    }
+
+    while(hasDegreeInf1(nodes_tmp)){
+       
+        Node node_tmp ;
+        for (int i = 0; i < nodes_tmp.size(); ++i) {
+            if(nodes[i].degree <= 1)
+                node_tmp = nodes_tmp[i] ;
+        }
+        nodes_tmp = deleteNode(node_tmp, edges, nodes_tmp);
+        edges = deleteEdge(node_tmp, edges);
+    };
+    
+    if(nodes_tmp.size() == 0)
+        return false;
+    else
+        return true;
+
+
+
+}
+
+
+/// Description
+/// Génération d'un arbre couvrant minimal à l'aide de l'algorithme de Kruskal
+void Graph::makeMiniTree_Kruskal(){
+    sortEdges();
+//     for (int i = 0; i < edges.size(); ++i) {
+//        cout<< edges[i].getWeight()<<endl;
+//    }
+    
+    if(nodes.size() > 0){
+        miniTree.clear();
+        cout<< "Clear all elements of miniTree "<< miniTree.size()<<endl;
+        cout<< "miniTree size: "<< miniTree.size()<<endl;
+        int nbr_N = 0;
+        int nbr_tmp = 0 ;
+        while( nbr_N < (int)nodes.size()-1){
+            vector<Edge> edges_tmp;
+            edges_tmp = miniTree;
+            edges_tmp.push_back(edges[nbr_tmp]);
+            if(!isCycle(edges_tmp)){
+                miniTree = edges_tmp;
+                
+                nbr_N++;
+            }
+            nbr_tmp++;
+            
+        };
+        
+        cout<< "Generate MST Done... "<<endl<<"MST:"<<endl;
+        for(int i = 0 ; i < miniTree.size() ; i++){
+            cout<<miniTree[i].getFrom()<<"-----"<<miniTree[i].getTo()<<endl;
+            
+        }
+        cout<<endl;
+        
+        
+    }
+}
+
+/// Description
+/// Trier ensemble d'arètes du plus petit au plus grand en utilisant l'algorithme à bulles
+void Graph::sortEdges(){
+
+    int nbrEdges = (int)edges.size();
+    for(int i = 0 ; i< nbrEdges-1; i++){
+        for(int j=0 ; j < nbrEdges-1-i;j++){
+            if(edges[j].getWeight() > edges[j+1].getWeight()){
+                Edge tmp = edges[j+1];
+                swap(edges[j], edges[j+1]);
+
+            }
+
+        }
+
+    }
+
 }

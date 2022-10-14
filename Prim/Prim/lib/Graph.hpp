@@ -20,6 +20,7 @@ struct Node{
     bool isSelected;
     int minWeight;
     string parent;
+    int degree = 0;
     
 };
 
@@ -38,10 +39,14 @@ public:
     int nbrEdges();
     void makeMiniTree();
     void makeMiniTree_Economic();
+    void makeMiniTree_Kruskal();
+
+
     
     
 private:
     vector<Edge> getAdjacentEdgeList(Node node);
+    void sortEdges();
     bool allSelected();
     int getMiniWeightNode();
     void calculMiniWeight(int index, vector<Edge> childrenEdges);
@@ -49,9 +54,11 @@ private:
     void sortMiniTree();
     bool allTtoS(vector<Edge> edges);
     bool sous_allTtoS(Node node, vector<Edge> edges);
+    bool isCycle(vector<Edge> edges);
     
 
     
 };
 
 #endif /* Graph_hpp */
+

@@ -56,5 +56,8 @@ int main(int argc, const char * argv[]) {
     graph.makeMiniTree();
     cout<<endl<<"after calculating, miniTree size: "<< graph.miniTree.size()<<endl;
     graph.makeMiniTree_Economic();
+    
+    cout<<endl<<endl<<endl<<endl<<"calculate by Kruskal"<<endl;
+    graph.makeMiniTree_Kruskal();
     return 0;
 }
